@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Ready-to-use script to deploy latest changes to Polemap Live machine
+
+# fetch latest changes from repo
+cd /home/polemap/polemap/
+git pull
+
+# rebuild virtual environment, in case requirements.txt changed
+make venv
+
+# apply Django migrations
+make migrate
+
+# restart Polemap UWSGI application
+touch /home/polemap/polemap/etc/uwsgi/vassals/polemap.ini
+
+# DONE!
+exit 0

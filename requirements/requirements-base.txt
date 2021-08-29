@@ -1,0 +1,12 @@
+# Base requirements
+pkgversion
+fqn-decorators
+requests
+uwsgi
+Django
+djangorestframework
+django-bootstrap4
+django-extensions
+django-formtools
+python-dateutil
+python-memcached
