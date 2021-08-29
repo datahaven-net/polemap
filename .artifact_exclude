@@ -1,0 +1,4 @@
+.git*
+docs/_build*
+venv
+src/test
