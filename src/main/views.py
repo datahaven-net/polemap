@@ -5,26 +5,33 @@ from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-
-from front import forms
+from main import forms
 
 
 class PoleNumbersView(FormView):
 
-    template_name = 'front/pole_numbers.html'
+    template_name = 'main/pole_numbers.html'
     form_class = forms.PoleNumbersForm
-    success_url = reverse_lazy('pole_numbers')
+    # success_url = reverse_lazy('pole_numbers')
+    error_message = 'Please enter a valid Anguilla Pole Numbers'
 
     def form_valid(self, form):
         pole_numbers_input = form.cleaned_data.get('input').strip().lower()
         if not pole_numbers_input:
-            return self.render_to_response(self.get_context_data(form=form, result=''))
+            messages.error(self.request, self.error_message)
+            return self.render_to_response(self.get_context_data(form=form))
         result = re.match('^(\w\s?\d\d\d?)\s?(\w\s?\d\d\d?)$', pole_numbers_input)
         if not result:
-            messages.error(self.request, 'Please enter a valid Anguilla Pole Numbers.')
-            return self.render_to_response(self.get_context_data(form=form, result=''))
+            messages.error(self.request, self.error_message)
+            # return self.render_to_response(self.get_context_data(form=form))
+            # return super().form_invalid(form)
+            # messages.error(self.request, self.error_message)
+            # return HttpResponseRedirect(self.request.path_info)
+            # return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form))
         try:
             num1 = result.group(1)
             num2 = result.group(2)
@@ -33,8 +40,8 @@ class PoleNumbersView(FormView):
             digits1 = num1[1:].strip()
             digits2 = num2[1:].strip()
         except:
-            messages.error(self.request, 'Please enter a valid Anguilla Pole Numbers.')
-            return self.render_to_response(self.get_context_data(form=form, result=''))
+            messages.error(self.request, self.error_message)
+            return self.render_to_response(self.get_context_data(form=form))
         pole_letters = {
             'a': '63:10',
             'b': '63:09',
@@ -63,8 +70,8 @@ class PoleNumbersView(FormView):
         val1 = pole_letters.get(letter1)
         val2 = pole_letters.get(letter2)
         if not val1 or not val2:
-            messages.error(self.request, 'Please enter a valid Anguilla Pole Numbers.')
-            return self.render_to_response(self.get_context_data(form=form, result=''))
+            messages.error(self.request, self.error_message)
+            return self.render_to_response(self.get_context_data(form=form))
         try:
             head1, _, tail1 = val1.partition(':')
             head2, _, tail2 = val2.partition(':')
@@ -73,18 +80,18 @@ class PoleNumbersView(FormView):
             lat = round(float(head1) + float(tail1) / 60.0, 6)
             lon = round(-1.0 * (float(head2) + float(tail2) / 60.0), 6)
         except:
-            messages.error(self.request, 'Please enter a valid Anguilla Pole Numbers.')
-            return self.render_to_response(self.get_context_data(form=form, result=''))
+            messages.error(self.request, self.error_message)
+            return self.render_to_response(self.get_context_data(form=form))
         return HttpResponseRedirect('https://www.google.com/maps/search/?api=1&query={}%2C{}'.format(lat, lon))
 
 
-def handler404(request, exception, template_name="front/404_error.html"):
+def handler404(request, exception, template_name="main/404_error.html"):
     response = render(request, template_name)
     response.status_code = 404
     return response
 
 
-def handler500(request, template_name="front/500_error.html"):
+def handler500(request, template_name="main/500_error.html"):
     response = render(request, template_name)
     response.status_code = 500
     return response

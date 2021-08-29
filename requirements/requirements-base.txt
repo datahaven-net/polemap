@@ -9,4 +9,4 @@ django-bootstrap4
 django-extensions
 django-formtools
 python-dateutil
-lxml
+python-memcached

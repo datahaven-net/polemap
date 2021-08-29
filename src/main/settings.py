@@ -58,7 +58,6 @@ DEBUGTOOLBAR_ENABLED = False
 METRICS_ENABLED = False
 CACHE_BACKEND = 'django.core.cache.backends.memcached.MemcachedCache'
 CACHE_LOCATION = '127.0.0.1:11211'
-
 CACHE_PREFIX = 'polemap'
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -102,30 +101,6 @@ LOGGING = {
             'formatter': 'timestamped',
             'filters': [],
         },
-        'polemap_poll': {
-            'level': LOG_LEVEL,
-            'class':'logging.StreamHandler',
-            'formatter': 'timestamped',
-            'stream': sys.stdout,
-        },
-        'btcpay_verify': {
-            'level': LOG_LEVEL,
-            'class':'logging.StreamHandler',
-            'formatter': 'timestamped',
-            'stream': sys.stdout,
-        },
-        'verify_4cs': {
-            'level': LOG_LEVEL,
-            'class':'logging.StreamHandler',
-            'formatter': 'simple',
-            'stream': sys.stdout,
-        },
-        'background_service': {
-            'level': LOG_LEVEL,
-            'class':'logging.StreamHandler',
-            'formatter': 'timestamped',
-            'stream': sys.stdout,
-        },
     },
     'loggers': {
         'django.request': {
@@ -133,72 +108,8 @@ LOGGING = {
             'propagate': False,
             'handlers': ['console', ],
         },
-        'back.csv_import': {
-            'level': LOG_LEVEL,
-            'propagate': False,
-            'handlers': ['console', ],
-        },
-        'zen.zpoll': {
-            'level': LOG_LEVEL,
-            'propagate': False,
-            'handlers': ['polemap_poll', ],
-        },
-        'billing.management.commands.btcpay_verify': {
-            'level': LOG_LEVEL,
-            'propagate': False,
-            'handlers': ['btcpay_verify', ],
-        },
-        'billing.management.commands.verify_4cs': {
-            'level': LOG_LEVEL,
-            'propagate': False,
-            'handlers': ['verify_4cs', ],
-        },
-        'back.management.commands.background_worker': {
-            'level': LOG_LEVEL,
-            'propagate': False,
-            'handlers': ['background_service', ],
-        },
-        'accounts.notifications': {
-            'level': LOG_LEVEL,
-            'propagate': False,
-            'handlers': ['background_service', ],
-        },
-        'pika': {
-            'level': 'WARNING',
-            'propagate': False,
-            'handlers': ['console', ],
-        },
-        'epp': {
-            'level': LOG_LEVEL,
-            'propagate': False,
-            'handlers': ['console', ]
-        },
-        'automats.automat': {
-            'level': LOG_LEVEL,
-            'propagate': False,
-            'handlers': ['console', ]
-        },
-    }
+    },
 }
-
-#------------------------------------------------------------------------------
-#--- Password validation
-# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
 
 #------------------------------------------------------------------------------
 #--- Internationalization
@@ -219,20 +130,26 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 #------------------------------------------------------------------------------
 #--- Application definition
 INSTALLED_APPS = [
-    'django.contrib.sessions',
+    # basic Django apps
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
     'django.contrib.messages',
-    'rest_framework',
+    'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
+    'rest_framework',
 
     # html templates: https://django-bootstrap4.readthedocs.io/en/stable/quickstart.html
     'bootstrap4',
+
     # useful things: https://django-extensions.readthedocs.io/en/latest/command_extensions.html
     'django_extensions',
-    'front',
     'main',
 ]
 
 MIDDLEWARE = [
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -279,9 +196,12 @@ if ENV in ['production', 'docker', ]:  # pragma: no cover
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 DATABASES_OPTIONS = {}
 DATABASES_TEST = {}
-DATABASES_CONN_MAX_AGE = 0
-DATABASES = {}
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
+}
 TEST_RUNNER = 'main.testing.DatabaselessTestRunner'
 
 #------------------------------------------------------------------------------
@@ -298,6 +218,10 @@ CACHES = {
 #------------------------------------------------------------------------------
 #--- Django Rest Framework
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+    'UNAUTHENTICATED_USER': None,
+    'DEFAULT_AUTHENTICATION_CLASSES' : [],
+    'DEFAULT_PERMISSION_CLASSES' : [],
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
