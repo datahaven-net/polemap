@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 from django.urls import path
-from django.conf.urls import include, url
 
 from main import views as main_views
 
