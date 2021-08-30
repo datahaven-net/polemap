@@ -1,9 +1,7 @@
 # coding=utf-8
 import mock
-import pytest
 
 from django.test import TestCase
-from django.conf import settings
 
 
 class TestPoleNumbersView(TestCase):
@@ -11,7 +9,7 @@ class TestPoleNumbersView(TestCase):
     def test_redirect_success(self):
         response = self.client.post('/', data=dict(input='S17J44'))
         assert response.status_code == 302
-        assert response.url == 'https://www.google.com/maps/search/?api=1&query=18.252833%2C-63.024'
+        assert response.url == 'https://maps.google.com/maps?&z=17&f=l&mrt=all&t=k&q=18.252833%2C-63.024'
 
     @mock.patch('django.contrib.messages.error')
     def test_invalid_input(self, mock_messages_error):

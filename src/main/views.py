@@ -1,11 +1,8 @@
 import re
 
-from django import shortcuts
-from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpResponseServerError
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse_lazy
 from django.views.generic import FormView
 
 from main import forms
@@ -15,7 +12,6 @@ class PoleNumbersView(FormView):
 
     template_name = 'main/pole_numbers.html'
     form_class = forms.PoleNumbersForm
-    # success_url = reverse_lazy('pole_numbers')
     error_message = 'Please enter a valid Anguilla Pole Numbers'
 
     def form_valid(self, form):
@@ -26,11 +22,6 @@ class PoleNumbersView(FormView):
         result = re.match('^(\w\s?\d\d\d?)\s?(\w\s?\d\d\d?)$', pole_numbers_input)
         if not result:
             messages.error(self.request, self.error_message)
-            # return self.render_to_response(self.get_context_data(form=form))
-            # return super().form_invalid(form)
-            # messages.error(self.request, self.error_message)
-            # return HttpResponseRedirect(self.request.path_info)
-            # return self.render_to_response(self.get_context_data(form=form))
             return self.render_to_response(self.get_context_data(form=form))
         try:
             num1 = result.group(1)
@@ -82,7 +73,10 @@ class PoleNumbersView(FormView):
         except:
             messages.error(self.request, self.error_message)
             return self.render_to_response(self.get_context_data(form=form))
-        return HttpResponseRedirect('https://www.google.com/maps/search/?api=1&query={}%2C{}'.format(lat, lon))
+        return HttpResponseRedirect('https://maps.google.com/maps?&z=17&f=l&mrt=all&t=k&q={}%2C{}'.format(
+            lat,
+            lon,
+        ))
 
 
 def handler404(request, exception, template_name="main/404_error.html"):
