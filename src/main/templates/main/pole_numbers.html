@@ -1,24 +1,40 @@
-{% extends 'base/index.html' %}
+{% extends 'base/container_sm_10.html' %}
 
 {% block main_content %}
 
-    <div class="text-center">
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-row justify-content-center">
-                <div class="col-lg-2">
-                    <input class="form-control form-control-lg" type="text" placeholder="S41 K21" aria-label="Pole number" name="input" value="{{ input }}" autofocus required>
-                </div>
-                <div class="col-lg-2">
-                    <button class="btn btn-success btn-lg btn-block" href="{% url 'pole_numbers' %}" type="submit">Show on GoogleMaps</button>
-                </div>
-                <div class="col-lg-12">
-                    <p>
-                        Enter the numbers from a utility pole in Anguilla to see where it is on Google Maps.
-                    </p>
-                </div>
-            </div>
-        </form>
+<form method="post">
+  {% csrf_token %}
+  {% bootstrap_form_errors form %}
+
+  <div class="row justify-content-md-center">
+    <div class="col-4">
+      <fieldset>
+        {% bootstrap_field form.lat layout="horizontal" placeholder="S41" size="small" label_class="form-label col-sm-4 text-right" horizontal_field_class="col-sm-4" %}
+      </fieldset>
     </div>
+  </div>
+
+  <div class="row justify-content-md-center">
+    <div class="col-4">
+      <fieldset>
+        {% bootstrap_field form.lon layout="horizontal" placeholder="K21" size="small" label_class="form-label col-sm-4 text-right" horizontal_field_class="col-sm-4" %}
+      </fieldset>
+    </div>
+  </div>
+
+
+  <div class="row justify-content-md-center">
+    <div class="col-4 text-center">
+      {% buttons %}
+        <button type="submit" class="form-button btn btn-success" href="{% url 'pole_numbers' %}">Show on GoogleMaps</button>
+      {% endbuttons %}
+    </div>
+  </div>
+
+  <p align=center>
+    Enter the numbers from a utility pole in Anguilla to see where it is on Google Maps.
+  </p>
+
+</form>
 
 {% endblock %}

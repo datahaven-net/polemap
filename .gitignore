@@ -1,6 +1,6 @@
 # Django
 src/main/params.py
-src/static/*
+# static/*
 
 
 # Byte-compiled / optimized / DLL files
