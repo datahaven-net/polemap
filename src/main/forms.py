@@ -5,7 +5,8 @@ from django.core.validators import RegexValidator
 class PoleNumbersForm(forms.Form):
 
     lat = fields.CharField(
-        label='upper code:',
+        label='',
+        help_text='upper code, for example: S17',
         required=True,
         validators=[RegexValidator(
             regex='^\s*?[q-zQ-Y]\s*?\d\d\d?\s*?$',
@@ -15,7 +16,8 @@ class PoleNumbersForm(forms.Form):
     )
 
     lon = fields.CharField(
-        label='lower code:',
+        label='',
+        help_text='lower code, for example: J44',
         required=True,
         validators=[RegexValidator(
             regex='^\s*?[a-nA-N]\s*?\d\d\d?\s*?$',

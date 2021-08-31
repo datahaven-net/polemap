@@ -1,39 +1,34 @@
-{% extends 'base/container_sm_10.html' %}
+{% extends 'base/container_fluid.html' %}
 
 {% block main_content %}
 
 <form method="post">
   {% csrf_token %}
-  {% bootstrap_form_errors form %}
 
   <div class="row justify-content-md-center">
-    <div class="col-4">
-      <fieldset>
-        {% bootstrap_field form.lat layout="horizontal" placeholder="S41" size="small" label_class="form-label col-sm-4 text-right" horizontal_field_class="col-sm-4" %}
-      </fieldset>
+    <div class="col-md-2">
+      {% bootstrap_form form %}
     </div>
   </div>
 
   <div class="row justify-content-md-center">
-    <div class="col-4">
-      <fieldset>
-        {% bootstrap_field form.lon layout="horizontal" placeholder="K21" size="small" label_class="form-label col-sm-4 text-right" horizontal_field_class="col-sm-4" %}
-      </fieldset>
-    </div>
-  </div>
-
-
-  <div class="row justify-content-md-center">
-    <div class="col-4 text-center">
+    <div class="col-12 text-center">
       {% buttons %}
         <button type="submit" class="form-button btn btn-success" href="{% url 'pole_numbers' %}">Show on GoogleMaps</button>
       {% endbuttons %}
     </div>
   </div>
 
-  <p align=center>
-    Enter the numbers from a utility pole in Anguilla to see where it is on Google Maps.
-  </p>
+  <div class="row justify-content-md-center">
+    <div class="col-12 text-center">
+      <p align=center>
+        Enter the numbers from a utility pole in Anguilla to see where it is on Google Maps.
+      </p>
+      <p align=center>
+        Read more about pole codes in Aguilla <a href="https://news.ai/ref/polenumbers.html" target="_blank" rel="noopener noreferrer">here</a>.
+      </p>
+    </div>
+  </div>
 
 </form>
 

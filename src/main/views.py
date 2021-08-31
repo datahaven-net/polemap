@@ -1,4 +1,3 @@
-from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import FormView
@@ -23,7 +22,6 @@ class PoleNumbersView(FormView):
             digits1 = num1[1:].strip()
             digits2 = num2[1:].strip()
         except:
-            messages.error(self.request, self.error_message)
             return self.render_to_response(self.get_context_data(form=form))
         if letter2 in 'qrstuvwxyz':
             l_temp = letter2
@@ -61,7 +59,6 @@ class PoleNumbersView(FormView):
         val1 = pole_letters.get(letter1)
         val2 = pole_letters.get(letter2)
         if not val1 or not val2:
-            messages.error(self.request, self.error_message)
             return self.render_to_response(self.get_context_data(form=form))
         try:
             head1, _, tail1 = val1.partition(':')
@@ -71,7 +68,6 @@ class PoleNumbersView(FormView):
             lat = round(float(head1) + float(tail1) / 60.0, 6)
             lon = round(-1.0 * (float(head2) + float(tail2) / 60.0), 6)
         except:
-            messages.error(self.request, self.error_message)
             return self.render_to_response(self.get_context_data(form=form))
         return HttpResponseRedirect('https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q={}%2C{}'.format(
             lat,
