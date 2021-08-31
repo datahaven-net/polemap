@@ -1,6 +1,3 @@
-import re
-
-from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import FormView
@@ -12,27 +9,27 @@ class PoleNumbersView(FormView):
 
     template_name = 'main/pole_numbers.html'
     form_class = forms.PoleNumbersForm
-    error_message = 'Please enter a valid Anguilla Pole Numbers'
+    error_message = 'Please enter a valid pole codes from Anguilla'
 
     def form_valid(self, form):
-        pole_numbers_input = form.cleaned_data.get('input').strip().lower()
-        if not pole_numbers_input:
-            messages.error(self.request, self.error_message)
-            return self.render_to_response(self.get_context_data(form=form))
-        result = re.match('^(\w\s?\d\d\d?)\s?(\w\s?\d\d\d?)$', pole_numbers_input)
-        if not result:
-            messages.error(self.request, self.error_message)
-            return self.render_to_response(self.get_context_data(form=form))
+        lat_input = form.cleaned_data.get('lat').strip().lower()
+        lon_input = form.cleaned_data.get('lon').strip().lower()
         try:
-            num1 = result.group(1)
-            num2 = result.group(2)
+            num1 = lat_input
+            num2 = lon_input
             letter1 = num1[0]
             letter2 = num2[0]
             digits1 = num1[1:].strip()
             digits2 = num2[1:].strip()
         except:
-            messages.error(self.request, self.error_message)
             return self.render_to_response(self.get_context_data(form=form))
+        if letter2 in 'qrstuvwxyz':
+            l_temp = letter2
+            d_temp = digits2
+            letter2 = letter1
+            digits2 = digits1
+            letter1 = l_temp
+            digits1 = d_temp
         pole_letters = {
             'a': '63:10',
             'b': '63:09',
@@ -57,11 +54,11 @@ class PoleNumbersView(FormView):
             'w': '18:11',
             'x': '18:10',
             'y': '18:09',
+            'z': '18:08',
         }
         val1 = pole_letters.get(letter1)
         val2 = pole_letters.get(letter2)
         if not val1 or not val2:
-            messages.error(self.request, self.error_message)
             return self.render_to_response(self.get_context_data(form=form))
         try:
             head1, _, tail1 = val1.partition(':')
@@ -71,9 +68,8 @@ class PoleNumbersView(FormView):
             lat = round(float(head1) + float(tail1) / 60.0, 6)
             lon = round(-1.0 * (float(head2) + float(tail2) / 60.0), 6)
         except:
-            messages.error(self.request, self.error_message)
             return self.render_to_response(self.get_context_data(form=form))
-        return HttpResponseRedirect('https://maps.google.com/maps?&z=17&f=l&mrt=all&t=k&q={}%2C{}'.format(
+        return HttpResponseRedirect('https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q={}%2C{}'.format(
             lat,
             lon,
         ))
