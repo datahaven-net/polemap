@@ -19,8 +19,7 @@
 
 
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+    listen 80;
     server_name buy-my-domain.com www.buy-my-domain.com;
     return 301 https://$server_name$request_uri;
 
@@ -32,8 +31,7 @@ server {
     access_log /home/polemap/logs/nginx;
     error_log /home/polemap/logs/nginx.err;    
 
-    listen 443 ssl default_server;
-    listen [::]:443 ssl default_server ipv6only=on;
+    listen 443 ssl;
 
     root /var/www/;
     index index.html index.htm;
@@ -52,7 +50,7 @@ server {
 
     location /static {    
         autoindex on;    
-        alias /home/polemap/polemap/src/static/;
+        alias /home/polemap/polemap/static/;
     }
 
     client_max_body_size 100M;
