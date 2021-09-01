@@ -10,7 +10,7 @@ class PoleNumbersForm(forms.Form):
         required=True,
         validators=[RegexValidator(
             regex='^\s*?[q-zQ-Y]\s*?\d\d\d?\s*?$',
-            message='The first character in the upper code should be a letter between Q and Y with the other 2 or 3 digits numbers.',
+            message='The first character in the upper code should be a letter between Q and Y.  After this there should be 2 or 3 numerical characters.',
             code='invalid',
         ), ],
     )
@@ -21,7 +21,7 @@ class PoleNumbersForm(forms.Form):
         required=True,
         validators=[RegexValidator(
             regex='^\s*?[a-nA-N]\s*?\d\d\d?\s*?$',
-            message='The first character in the lower code should be a letter between A and N with the other 2 or 3 digits numbers.',
+            message=' The first character in the lower code should be a letter between A and N.  After this there should be 2 or 3 numerical characters.',
             code='invalid',
         ), ],
     )

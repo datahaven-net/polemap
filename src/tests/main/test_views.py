@@ -12,7 +12,7 @@ class TestPoleNumbersView(TestCase):
     def test_invalid_input(self):
         response = self.client.post('/', data=dict(lat='wrong', lon='input'), follow=True)
         assert response.status_code == 200
-        assert response.context['field_errors'] == ['The first character in the upper code should be a letter between Q and Y with the other 2 or 3 digits numbers.']
+        assert response.context['field_errors'] == ['The first character in the upper code should be a letter between Q and Y.  After this there should be 2 or 3 numerical characters.']
 
 
 class TestErrorViews(TestCase):
