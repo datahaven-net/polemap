@@ -1,0 +1,56 @@
+{% extends 'base/container_fluid.html' %}
+{% load static %}
+
+{% block main_content %}
+
+<script>
+  function copy_clipboard(element_id) {
+    var copyText = document.getElementById(element_id)
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    console.log('Copied Text')
+  }
+</script>
+
+<div class="row justify-content-center align-items-center">
+
+  <div class="col-4 text-center">
+    <br/>
+    <br/>
+    <p class="mdb-color-text" align="center">
+      <b>pole codes</b> at the location:
+    </p>
+    <h1><code>{{ upper_code }}</code></h1>
+    <h1><code>{{ lower_code }}</code></h1>
+    <br/>
+    <br/>
+
+    <p class="mdb-color-text" align="center">
+      latitude and longitude as decimal degrees:
+      <br/>
+      <code>{{ lat_dd }}, {{ lon_dd }}</code>
+    </p>
+    <br/>
+    <br/>
+
+    <p class="mdb-color-text" align="center">
+      link to share:
+    </p>
+    <div class="input-group mx-auto w-50">
+      <input id="share_link" class="form-control" type="text" value="{{ share_link }}" style="max-width: 300px;" />
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button" onclick="copy_clipboard('share_link')">copy</button>
+      </span>
+    </div>
+    <br/>
+    <br/>
+
+    {% bootstrap_button "back" button_type="link" size="medium" href="https://polemap.ai" button_class="btn-secondary" %}
+
+
+  </div>
+
+</div>
+
+{% endblock %}
