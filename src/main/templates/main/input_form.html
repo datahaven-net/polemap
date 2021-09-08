@@ -1,0 +1,177 @@
+{% extends 'base/container_fluid.html' %}
+{% load static %}
+
+{% block main_content %}
+
+{% bootstrap_form_errors form %}
+
+{% if messages %}
+<div class="container-fluid mt-3">
+  {% include 'bootstrap4/messages.html' %}
+</div>
+{% endif %}
+
+
+<div class="row justify-content-center align-items-center">
+
+  <div class="col-4">
+    <div class="form d-flex justify-content-between">
+
+      <div class="image" align=right>
+        <img src="{% static 'images/utility_pole.jpeg' %}" width=300 style="padding-right:15px;">
+      </div>
+
+      <div class="form">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="row">
+          <div class="col-12">
+            <h4 class="font-weight-bold mb-3">Google Maps location</h4>
+            <p class="mdb-color-text" align="justify">Enter the numbers from a utility pole in Anguilla to see where it is on Google Maps.</p>
+          </div>
+
+          <div class="col-6">
+          </div>
+          <div class="md-form md-outline col-6 float-right">
+            {% bootstrap_field form.upper_code placeholder="S17" size="medium" %}
+          </div>
+
+          <div class="col-6">
+          </div>
+          <div class="md-form md-outline col-6 float-right">
+            {% bootstrap_field form.lower_code placeholder="J44" size="medium" %}
+          </div>
+        </div>
+
+        <div class="space">
+          <div class="float-right">
+            {% buttons %}
+              <button type="submit" class="form-button btn btn-success" href="{% url 'pole_numbers' %}" name="button_show" value="">show on Google Maps</button>
+            {% endbuttons %}
+          </div>
+        </div>
+
+      </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+
+<div class="row justify-content-center align-items-center">
+  <div class="col-4">
+    <br/>
+    <hr/>
+  </div>
+</div>
+
+
+
+<div class="row justify-content-center align-items-center">
+
+  <div class="col-4">
+    <div class="form d-flex justify-content-between">
+
+      <div class="image" align=right>
+        <img src="{% static 'images/googlemap_gps.png' %}" width=300 style="padding-right:15px;">
+      </div>
+
+      <div class="form">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="row">
+          <div class="col-12">
+            <h4 class="font-weight-bold mb-3">Convert GPS to pole codes</h4>
+            <p class="mdb-color-text" align="justify">Enter GPS coordinates to calculate corresponding pole codes at exact location in Anguilla.</p>
+          </div>
+
+          <div class="md-form md-outline col-12 float-right">
+            {% bootstrap_field form.gps_dms_input placeholder="18&deg;15&apos;10.2&quot;N 63&deg;01&apos;26.4&quot;W" size="medium" %}
+          </div>
+
+          <div class="md-form md-outline col-12 float-right">
+            {% bootstrap_field form.gps_dd_input placeholder="18.252833, -63.024000" size="medium" %}
+          </div>
+        </div>
+
+        <div class="space">
+          <div class="float-right">
+            {% buttons %}
+              <button type="submit" class="form-button btn btn-success" href="{% url 'pole_numbers' %}" name="button_calculate" value="">calculate pole codes</button>
+            {% endbuttons %}
+          </div>
+        </div>
+
+      </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+
+<div class="row justify-content-center align-items-center">
+  <div class="col-4">
+    <br/>
+    <hr/>
+  </div>
+</div>
+
+
+
+<div class="row justify-content-center align-items-center">
+
+  <div class="col-4">
+
+    <div class="row">
+      <div class="col-6">
+        <div class="image" align=right>
+          <img src="{% static 'images/googlemap_share_link.png' %}" width=300 style="padding-bottom:10px;">
+        </div>
+      </div>
+      <div class="col-6">
+        <h4 class="font-weight-bold mb-3">Goole Maps link</h4>
+        <p class="mdb-color-text" align="justify">
+          Enter Google Maps URL to calculate corresponding pole codes at exact location in Anguilla.
+        </p>
+        <p class="mdb-color-text" align="justify">
+          On Google Maps you can simply click "Share" button to obtain the link.
+        </p>
+        <p class="mdb-color-text" align="justify">
+          You can also copy the full URL, when desired location on the map is opened in your Web Browser.
+        </p>
+      </div>
+    </div>
+
+    <div class="form">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row">
+          <div class="md-form md-outline col-12 float-right">
+            {% bootstrap_field form.google_url placeholder="https://goo.gl/maps/axGS1ENr7SvACS5D8" size="medium" %}
+          </div>
+        </div>
+        <div class="space">
+          <div class="float-right">
+            {% buttons %}
+              <button type="submit" class="form-button btn btn-success" href="{% url 'pole_numbers' %}" name="button_read" value="">read pole codes</button>
+            {% endbuttons %}
+          </div>
+        </div>
+
+    </form>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
