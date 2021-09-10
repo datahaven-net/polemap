@@ -12,19 +12,15 @@ class TestPoleNumbersView(TestCase):
             button_show='1',
         ))
         assert response.status_code == 302
-        assert response.url == 'https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q=18.252833%2C-63.024'
+        assert response.url == '/s17j44'
 
     def test_button_calculate(self):
         response = self.client.post('/', data=dict(
             gps_dd_input='18.252833, -63.024000',
             button_calculate='1',
         ))
-        assert response.status_code == 200
-        assert response.context['upper_code'] == 'S17'
-        assert response.context['lower_code'] == 'J44'
-        assert response.context['lat_dd'] == 18.252833
-        assert response.context['lon_dd'] == 63.024
-        assert response.context['share_link'] == 'https://polemap.ai/s17j44'
+        assert response.status_code == 302
+        assert response.url == '/s17j44'
 
     @mock.patch('requests.request')
     def test_button_read(self, request_mock):
@@ -35,12 +31,8 @@ class TestPoleNumbersView(TestCase):
             google_url='https://goo.gl/maps/nmeJyCn1oGudvLY29',
             button_read='1',
         ))
-        assert response.status_code == 200
-        assert response.context['upper_code'] == 'S17'
-        assert response.context['lower_code'] == 'J44'
-        assert response.context['lat_dd'] == 18.252833
-        assert response.context['lon_dd'] == 63.024
-        assert response.context['share_link'] == 'https://polemap.ai/s17j44'
+        assert response.status_code == 302
+        assert response.url == '/s17j44'
 
     def test_invalid_input(self):
         response = self.client.post('/', data=dict(lat='wrong', lon='input'), follow=True)

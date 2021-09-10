@@ -27,9 +27,17 @@
     <br/>
 
     <p class="mdb-color-text" align="center">
-      latitude and longitude as decimal degrees:
+      GPS coordinates of the location as <b>decimal degrees</b>:
       <br/>
       <code>{{ lat_dd }}, {{ lon_dd }}</code>
+    </p>
+    <br/>
+    <br/>
+
+    <p class="mdb-color-text" align="center">
+      GPS coordinates of the location in <b>degrees minutes seconds</b> format:
+      <br/>
+      <code>{{ lat_dms }} {{ lon_dms }}</code>
     </p>
     <br/>
     <br/>
@@ -40,14 +48,16 @@
     <div class="input-group mx-auto w-50">
       <input id="share_link" class="form-control" type="text" value="{{ share_link }}" style="max-width: 300px;" />
       <span class="input-group-btn">
-        <button class="btn btn-default" type="button" onclick="copy_clipboard('share_link')">copy</button>
+        <a class="btn btn-light" type="button" role="button" onclick="copy_clipboard('share_link')"><span class="fa fa-copy">&nbsp;</span></a>
       </span>
     </div>
     <br/>
     <br/>
 
-    {% bootstrap_button "back" button_type="link" size="medium" href="https://polemap.ai" button_class="btn-secondary" %}
-
+    <a class="btn btn-success" href="{{ google_url }}" role="button" target="_blank">
+      <span class="fa fa-map-marker">&nbsp;</span>
+      Google Maps at <b>{{ upper_code }} {{ lower_code }}</b>
+    </a>
 
   </div>
 

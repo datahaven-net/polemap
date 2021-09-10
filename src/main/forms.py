@@ -59,14 +59,14 @@ class PoleNumbersForm(forms.Form):
             gps_dms_input = cleaned_data.pop('gps_dms_input', '') and ''
         if upper_code:
             RegexValidator(
-                regex='^\s*?[q-zQ-Y]\s*?\d\d\d?\s*?$',
-                message='The first character in the upper code should be a letter between Q and Y.  After this there should be 2 or 3 numerical characters.',
+                regex='^\s*?[q-zQ-Y]\s*?\d{1,4}\s*?$',
+                message='The first character in the upper code should be a letter between Q and Y. After this there should be from 1 to 4 numerical characters.',
                 code='invalid',
             )(upper_code)
         if lower_code:
             RegexValidator(
-                regex='^\s*?[a-nA-N]\s*?\d\d\d?\s*?$',
-                message=' The first character in the lower code should be a letter between A and N.  After this there should be 2 or 3 numerical characters.',
+                regex='^\s*?[a-nA-N]\s*?\d{1,4}\s*?$',
+                message=' The first character in the lower code should be a letter between A and N. After this there should be from 1 to 4 numerical characters.',
                 code='invalid',
             )(lower_code)
         if gps_dms_input:

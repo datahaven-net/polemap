@@ -3,8 +3,9 @@ import requests
 
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import FormView
+from django.views.generic import TemplateView
 
 from main import forms
 
@@ -64,6 +65,8 @@ pole_code_map = {
 
 
 def dd_to_pole_codes(lat_dd, lon_dd):
+    lat_dd = abs(lat_dd)
+    lon_dd = abs(lon_dd)
     lat_head = int(lat_dd)
     lon_head = int(lon_dd)
     lat_tail = ( lat_dd * 1000000.0 - lat_head * 1000000.0 ) / 1000000.0
@@ -85,6 +88,72 @@ def dd_to_pole_codes(lat_dd, lon_dd):
     return lat_result, lon_result
 
 
+def dd_to_dms(lat_dd, lon_dd):
+    lat_dd = abs(lat_dd)
+    lon_dd = abs(lon_dd)
+    lat_deg = int(lat_dd)
+    lon_deg = int(lon_dd)
+    lat_tail = ( lat_dd * 1000000.0 - lat_deg * 1000000.0 ) / 1000000.0
+    lon_tail = ( lon_dd * 1000000.0 - lon_deg * 1000000.0 ) / 1000000.0
+    lat_min = str(int(lat_tail * 60.0)).zfill(2)
+    lon_min = str(int(lon_tail * 60.0)).zfill(2)
+    lat_sec = round(( lat_tail * 60.0 - int(lat_tail * 60) ) * 60.0 , 1)
+    lon_sec = round(( lon_tail * 60.0 - int(lon_tail * 60) ) * 60.0 , 1)
+    lat_dms = f'{lat_deg}°{lat_min}\'{lat_sec}"N'
+    lon_dms = f'{lon_deg}°{lon_min}\'{lon_sec}"W'
+    return lat_dms, lon_dms
+
+
+class PoleCodeView(TemplateView):
+    template_name = 'main/result_page.html'
+
+    def get(self, request, *args, **kwargs):
+        pole_code = kwargs.get('pole_code', '')
+        re_result = re.match('^(\w\d+?)\s*?(\w\d+?)$', pole_code)
+        if not re_result:
+            return redirect('pole_numbers')
+        upper_code = re_result.group(1).lower()
+        lower_code = re_result.group(2).lower()
+        try:
+            letter1 = upper_code[0]
+            letter2 = lower_code[0]
+            digits1 = upper_code[1:].strip()
+            digits2 = lower_code[1:].strip()
+        except:
+            return redirect('pole_numbers')
+        if letter2 in 'qrstuvwxyz':
+            l_temp = letter2
+            d_temp = digits2
+            letter2 = letter1
+            digits2 = digits1
+            letter1 = l_temp
+            digits1 = d_temp
+        val1 = pole_letters.get(letter1)
+        val2 = pole_letters.get(letter2)
+        if not val1 or not val2:
+            return redirect('pole_numbers')
+        try:
+            head1, _, tail1 = val1.partition(':')
+            head2, _, tail2 = val2.partition(':')
+            tail1 += '.' + digits1
+            tail2 += '.' + digits2
+            lat = round(float(head1) + float(tail1) / 60.0, 6)
+            lon = round(-1.0 * (float(head2) + float(tail2) / 60.0), 6)
+            lat_dms, lon_dms = dd_to_dms(lat, lon)
+        except:
+            return redirect('pole_numbers')
+        ctx = self.get_context_data(**kwargs)
+        ctx['upper_code'] = upper_code.upper()
+        ctx['lower_code'] = lower_code.upper()
+        ctx['lat_dd'] = lat
+        ctx['lon_dd'] = lon
+        ctx['lat_dms'] = lat_dms
+        ctx['lon_dms'] = lon_dms
+        ctx['share_link'] = f'https://polemap.ai/{upper_code}{lower_code}'
+        ctx['google_url'] = f'https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q={lat}%2C{lon}'
+        return self.render_to_response(ctx)
+
+
 class PoleNumbersView(FormView):
 
     template_name = 'main/input_form.html'
@@ -92,8 +161,8 @@ class PoleNumbersView(FormView):
     error_message = 'Please enter a valid pole codes from Anguilla'
 
     def form_valid(self, form):
-        lat_input = form.cleaned_data.get('upper_code', '').strip().lower()
-        lon_input = form.cleaned_data.get('lower_code', '').strip().lower()
+        upper_code = form.cleaned_data.get('upper_code', '').strip().lower()
+        lower_code = form.cleaned_data.get('lower_code', '').strip().lower()
         gps_dms_input = form.cleaned_data.get('gps_dms_input', '').strip().upper()
         gps_dd_input = form.cleaned_data.get('gps_dd_input', '').strip()
         google_url = form.cleaned_data.get('google_url', '').strip()
@@ -110,12 +179,12 @@ class PoleNumbersView(FormView):
                     lat_dd = abs(float(lat_dd.strip()))
                     lon_dd = abs(float(lon_dd.strip()))
                 except:
-                    messages.error(self.request, 'Input string is not a valid GPS location in Decimal Degrees format')
+                    messages.error(self.request, 'Input string is not a valid GPS coordinates in Decimal Degrees format')
                     return self.form_invalid(form)
             if gps_dms_input:
                 re_result = re.match('^(\d+?)\°(\d+?)\'([\d\.]+?)\"N\s+?(\d+?)\°(\d+?)\'([\d\.]+?)\"W$', gps_dms_input.strip().upper())
                 if not re_result:
-                    messages.error(self.request, 'Input string is not a valid GPS location in Degrees Minutes Seconds format')
+                    messages.error(self.request, 'Input string is not a valid GPS coordinates in Degrees Minutes Seconds format')
                     return self.form_invalid(form)
                 try:
                     lat_deg = re_result.group(1)
@@ -125,29 +194,25 @@ class PoleNumbersView(FormView):
                     lon_min = re_result.group(5)
                     lon_sec = re_result.group(6)
                     lat_dd = round(float(lat_deg) + ( float(lat_min) + float(lat_sec) / 60.0 ) / 60.0, 6)
-                    lon_dd = round(float(lon_deg) + ( float(lon_min) + float(lon_sec) / 60.0 ) / 60.0, 6)
+                    lon_dd = -1.0 * round(float(lon_deg) + ( float(lon_min) + float(lon_sec) / 60.0 ) / 60.0, 6)
                 except:
-                    messages.error(self.request, 'Input string is not a valid GPS location in Degrees Minutes Seconds format')
+                    messages.error(self.request, 'Input string is not a valid GPS coordinates in Degrees Minutes Seconds format')
                     return self.form_invalid(form)
             if not lat_dd or not lon_dd:
-                messages.error(self.request, 'Please enter GPS location located in Anguilla')
+                messages.error(self.request, 'Please enter the GPS coordinates of location in Anguilla')
                 return self.form_invalid(form)
 
-            lat_result, lon_result = dd_to_pole_codes(lat_dd, lon_dd)
-            if not lat_result or not lon_result:
-                messages.error(self.request, 'Entered GPS location is not located in Anguilla')
+            upper_code, lower_code = dd_to_pole_codes(lat_dd, lon_dd)
+            if not upper_code or not lower_code:
+                messages.error(self.request, 'GPS coordinates is pointing to a location outside of Anguilla')
                 return self.form_invalid(form)
 
-            ctx = self.get_context_data(form=form)
-            ctx['upper_code'] = lat_result
-            ctx['lower_code'] = lon_result
-            ctx['lat_dd'] = lat_dd
-            ctx['lon_dd'] = lon_dd
-            ctx['share_link'] = 'https://polemap.ai/{}{}'.format(lat_result.lower(), lon_result.lower())
-            self.template_name = 'main/result_page.html'
-            return self.render_to_response(ctx)
+            return redirect(f'/{upper_code.lower()}{lower_code.lower()}')
 
         if button_read:
+            if not google_url:
+                messages.error(self.request, 'Please enter a link from Google Maps')
+                return self.form_invalid(form)
             try:
                 resp = requests.request('GET', google_url)
                 resp.raise_for_status()
@@ -158,37 +223,29 @@ class PoleNumbersView(FormView):
             if not re_result:
                 re_result = re.match('.+?/maps/place/.+?/\@([\+\-]?[\d\.]+?)\,([\+\-]?[\d\.]+?)\,\d+?\w/.+?', resp.url)
             if not re_result:
-                messages.error(self.request, 'Provided URL address is not a valid Google Maps location')
+                messages.error(self.request, 'Provided URL address is not a valid Google Maps link')
                 return self.form_invalid(form)
-            print(re_result.groups())
             try:
                 lat_dd = abs(float(re_result.group(1)))
-                lon_dd = abs(float(re_result.group(2)))
+                lon_dd = -1.0 * abs(float(re_result.group(2)))
             except:
-                messages.error(self.request, 'Provided URL address is not a valid Google Maps location')
+                messages.error(self.request, 'Provided URL address is not a valid Google Maps link')
                 return self.form_invalid(form)
 
-            lat_result, lon_result = dd_to_pole_codes(lat_dd, lon_dd)
-            if not lat_result or not lon_result:
-                messages.error(self.request, 'Entered GPS location is not located in Anguilla')
+            upper_code, lower_code = dd_to_pole_codes(lat_dd, lon_dd)
+            if not upper_code or not lower_code:
+                messages.error(self.request, 'GPS coordinates is pointing to a location outside of Anguilla')
                 return self.form_invalid(form)
 
-            ctx = self.get_context_data(form=form)
-            ctx['upper_code'] = lat_result
-            ctx['lower_code'] = lon_result
-            ctx['lat_dd'] = lat_dd
-            ctx['lon_dd'] = lon_dd
-            ctx['share_link'] = 'https://polemap.ai/{}{}'.format(lat_result.lower(), lon_result.lower())
-            self.template_name = 'main/result_page.html'
-            return self.render_to_response(ctx)
+            return redirect(f'/{upper_code.lower()}{lower_code.lower()}')
 
         if button_show:
-            if not lat_input or not lon_input:
+            if not upper_code or not lower_code:
                 messages.error(self.request, 'Please enter both upper and lower pole codes')
                 return self.form_invalid(form)
             try:
-                num1 = lat_input
-                num2 = lon_input
+                num1 = upper_code
+                num2 = lower_code
                 letter1 = num1[0]
                 letter2 = num2[0]
                 digits1 = num1[1:].strip()
@@ -212,10 +269,10 @@ class PoleNumbersView(FormView):
                 tail1 += '.' + digits1
                 tail2 += '.' + digits2
                 lat = round(float(head1) + float(tail1) / 60.0, 6)
-                lon = round(-1.0 * (float(head2) + float(tail2) / 60.0), 6)
+                lon = -1.0 * round((float(head2) + float(tail2) / 60.0), 6)
             except:
                 return self.form_invalid(form)
-            return HttpResponseRedirect(f'https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q={lat}%2C{lon}')
+            return redirect(f'/{upper_code.lower()}{lower_code.lower()}')
 
         messages.error(self.request, 'Invalid input received')
         return self.form_invalid(form)
