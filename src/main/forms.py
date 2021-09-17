@@ -30,9 +30,16 @@ class PoleNumbersForm(forms.Form):
 
     google_url = fields.CharField(
         label='',
-        help_text='',
+        help_text='Google Maps share link or full URL address',
         required=False,
     )
+
+#     high_precision = fields.BooleanField(
+#         label='high precision, longer pole codes',
+#         help_text='',
+#         required=False,
+#         initial=False,
+#     )
 
     def clean(self):
         cleaned_data = super(PoleNumbersForm, self).clean()
@@ -83,7 +90,7 @@ class PoleNumbersForm(forms.Form):
             )(gps_dd_input)
         if google_url:
             RegexValidator(
-                regex='^https?\:\/\/[\d\w\.\-\/\%\'\+\!\:\=\,\`\@]+?$',
+                regex='^https?\:\/\/[\d\w\.\-\/\%\'\+\!\:\=\,\`\@\?]+?$',
                 message='Please input a valid URL link',
                 code='invalid',
             )(google_url)
