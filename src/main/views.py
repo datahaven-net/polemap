@@ -1,13 +1,15 @@
 import re
 import requests
+import logging
 
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.views.generic import FormView
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
 from main import forms
+
 
 pole_letters = {
     'a': '63:10',
@@ -64,17 +66,18 @@ pole_code_map = {
 }
 
 
-def dd_to_pole_codes(lat_dd, lon_dd):
+def dd_to_pole_codes(lat_dd, lon_dd, precision=3):
+    mul = float(str('1' + '0' * precision))
     lat_dd = abs(lat_dd)
     lon_dd = abs(lon_dd)
     lat_head = int(lat_dd)
     lon_head = int(lon_dd)
-    lat_tail = ( lat_dd * 1000000.0 - lat_head * 1000000.0 ) / 1000000.0
-    lon_tail = ( lon_dd * 1000000.0 - lon_head * 1000000.0 ) / 1000000.0
+    lat_tail = ( lat_dd * 10000000.0 - lat_head * 10000000.0 ) / 10000000.0
+    lon_tail = ( lon_dd * 10000000.0 - lon_head * 10000000.0 ) / 10000000.0
     lat_min = int(lat_tail * 60.0)
     lon_min = int(lon_tail * 60.0)
-    lat_sec = str(int(round(( lat_tail * 60.0 - lat_min ) * 1000.0, 0))).zfill(3).rstrip('0')
-    lon_sec = str(int(round(( lon_tail * 60.0 - lon_min ) * 1000.0, 0))).zfill(3).rstrip('0')
+    lat_sec = str(int(round(( lat_tail * 60.0 - lat_min ) * mul, 0))).zfill(precision).rstrip('0')
+    lon_sec = str(int(round(( lon_tail * 60.0 - lon_min ) * mul, 0))).zfill(precision).rstrip('0')
     lat_min = str(lat_min).zfill(2)
     lon_min = str(lon_min).zfill(2)
     lat_code = f'{lat_head}:{lat_min}'
@@ -104,7 +107,52 @@ def dd_to_dms(lat_dd, lon_dd):
     return lat_dms, lon_dms
 
 
-class PoleCodeView(TemplateView):
+class PoleCodeGoogleMapsView(RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        pole_code = kwargs.get('pole_code', '')
+        re_result = re.match('^(\w\d+?)\s*?(\w\d+?)$', pole_code)
+        if not re_result:
+            return '/'
+        upper_code = re_result.group(1).lower()
+        lower_code = re_result.group(2).lower()
+        if not upper_code or not lower_code:
+            return '/'
+        try:
+            num1 = upper_code
+            num2 = lower_code
+            letter1 = num1[0]
+            letter2 = num2[0]
+            digits1 = num1[1:].strip()
+            digits2 = num2[1:].strip()
+        except:
+            logging.exception('invalid input received')
+            return '/'
+        if letter2 in 'qrstuvwxyz':
+            l_temp = letter2
+            d_temp = digits2
+            letter2 = letter1
+            digits2 = digits1
+            letter1 = l_temp
+            digits1 = d_temp
+        val1 = pole_letters.get(letter1)
+        val2 = pole_letters.get(letter2)
+        if not val1 or not val2:
+            return '/'
+        try:
+            head1, _, tail1 = val1.partition(':')
+            head2, _, tail2 = val2.partition(':')
+            tail1 += '.' + digits1
+            tail2 += '.' + digits2
+            lat = round(float(head1) + float(tail1) / 60.0, 6)
+            lon = -1.0 * round((float(head2) + float(tail2) / 60.0), 6)
+        except:
+            logging.exception('invalid input received')
+            return '/'
+        return f'https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q={lat}%2C{lon}'
+
+
+class PoleCodeInfoView(TemplateView):
     template_name = 'main/result_page.html'
 
     def get(self, request, *args, **kwargs):
@@ -169,6 +217,8 @@ class PoleNumbersView(FormView):
         button_show = 'button_show' in form.data
         button_calculate = 'button_calculate' in form.data
         button_read = 'button_read' in form.data
+        button_gps = 'button_gps' in form.data
+        high_precision = 'high_precision' in form.data
 
         if button_calculate:
             lat_dd = None
@@ -202,12 +252,12 @@ class PoleNumbersView(FormView):
                 messages.error(self.request, 'Please enter the GPS coordinates of location in Anguilla')
                 return self.form_invalid(form)
 
-            upper_code, lower_code = dd_to_pole_codes(lat_dd, lon_dd)
+            upper_code, lower_code = dd_to_pole_codes(lat_dd, lon_dd, precision=(4 if high_precision else 3))
             if not upper_code or not lower_code:
                 messages.error(self.request, 'GPS coordinates is pointing to a location outside of Anguilla')
                 return self.form_invalid(form)
 
-            return redirect(f'/{upper_code.lower()}{lower_code.lower()}')
+            return redirect(f'/{upper_code.lower()}{lower_code.lower()}/info')
 
         if button_read:
             if not google_url:
@@ -232,14 +282,14 @@ class PoleNumbersView(FormView):
                 messages.error(self.request, 'Provided URL address is not a valid Google Maps link')
                 return self.form_invalid(form)
 
-            upper_code, lower_code = dd_to_pole_codes(lat_dd, lon_dd)
+            upper_code, lower_code = dd_to_pole_codes(lat_dd, lon_dd, precision=(4 if high_precision else 3))
             if not upper_code or not lower_code:
                 messages.error(self.request, 'GPS coordinates is pointing to a location outside of Anguilla')
                 return self.form_invalid(form)
 
-            return redirect(f'/{upper_code.lower()}{lower_code.lower()}')
+            return redirect(f'/{upper_code.lower()}{lower_code.lower()}/info')
 
-        if button_show:
+        if button_show or button_gps:
             if not upper_code or not lower_code:
                 messages.error(self.request, 'Please enter both upper and lower pole codes')
                 return self.form_invalid(form)
@@ -272,6 +322,8 @@ class PoleNumbersView(FormView):
                 lon = -1.0 * round((float(head2) + float(tail2) / 60.0), 6)
             except:
                 return self.form_invalid(form)
+            if button_gps:
+                return redirect(f'/{upper_code.lower()}{lower_code.lower()}/info')
             return redirect(f'/{upper_code.lower()}{lower_code.lower()}')
 
         messages.error(self.request, 'Invalid input received')

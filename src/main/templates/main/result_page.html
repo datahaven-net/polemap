@@ -15,7 +15,7 @@
 
 <div class="row justify-content-center align-items-center">
 
-  <div class="col-4 text-center">
+  <div class="col-lg-4 col-md-6 col-sm-12 text-center">
     <br/>
     <br/>
     <p class="mdb-color-text" align="center">
@@ -23,6 +23,18 @@
     </p>
     <h1><code>{{ upper_code }}</code></h1>
     <h1><code>{{ lower_code }}</code></h1>
+    <br/>
+    <br/>
+
+    <p class="mdb-color-text" align="center">
+      link to share:
+    </p>
+    <div class="input-group mx-auto w-50">
+      <input id="share_link" class="form-control" type="text" value="{{ share_link }}" style="min-width: 240px; max-width: 320px;" />
+      <span class="input-group-btn">
+        <a class="btn btn-light" type="button" role="button" onclick="copy_clipboard('share_link')"><span class="fa fa-copy">&nbsp;</span></a>
+      </span>
+    </div>
     <br/>
     <br/>
 
@@ -39,18 +51,6 @@
       <br/>
       <code>{{ lat_dms }} {{ lon_dms }}</code>
     </p>
-    <br/>
-    <br/>
-
-    <p class="mdb-color-text" align="center">
-      link to share:
-    </p>
-    <div class="input-group mx-auto w-50">
-      <input id="share_link" class="form-control" type="text" value="{{ share_link }}" style="max-width: 300px;" />
-      <span class="input-group-btn">
-        <a class="btn btn-light" type="button" role="button" onclick="copy_clipboard('share_link')"><span class="fa fa-copy">&nbsp;</span></a>
-      </span>
-    </div>
     <br/>
     <br/>
 
