@@ -129,12 +129,7 @@ class PoleCodeGoogleMapsView(RedirectView):
             logging.exception('invalid input received')
             return '/'
         if letter2 in 'qrstuvwxyz':
-            l_temp = letter2
-            d_temp = digits2
-            letter2 = letter1
-            digits2 = digits1
-            letter1 = l_temp
-            digits1 = d_temp
+            return f'/{lower_code.lower()}{upper_code.lower()}'
         val1 = pole_letters.get(letter1)
         val2 = pole_letters.get(letter2)
         if not val1 or not val2:
@@ -170,12 +165,7 @@ class PoleCodeInfoView(TemplateView):
         except:
             return redirect('pole_numbers')
         if letter2 in 'qrstuvwxyz':
-            l_temp = letter2
-            d_temp = digits2
-            letter2 = letter1
-            digits2 = digits1
-            letter1 = l_temp
-            digits1 = d_temp
+            return redirect(f'/{lower_code.lower()}{upper_code.lower()}/info')
         val1 = pole_letters.get(letter1)
         val2 = pole_letters.get(letter2)
         if not val1 or not val2:
