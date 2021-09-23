@@ -14,13 +14,17 @@
 
 <div class="row justify-content-center align-items-center">
 
-  <div class="col-sm-12 col-md-12 col-lg-8">
+  <div class="col-sm-12 col-md-12 col-lg-7">
 
     <div class="row">
 
+      <div class="col-12 text-right">
+        <h4 class="font-weight-bold mb-3">Google Maps location</h4>
+      </div>
+
       <div class="col-lg-6 col-sm-12">
-        <div class="image" align=center>
-          <img src="{% static 'images/utility_pole.jpeg' %}" style="padding-right:15px; max-width:300px">
+        <div class="image" align=right>
+          <img src="{% static 'images/utility_pole.jpg' %}" style="padding-right:15px; max-width:300px">
         </div>
       </div>
 
@@ -31,29 +35,30 @@
 
             <div class="row">
               <div class="col-12">
-                <h4 class="font-weight-bold mb-3">Google Maps location</h4>
                 <p class="mdb-color-text" align="justify">Enter the numbers from a utility pole in Anguilla to see where it is on Google Maps.</p>
               </div>
 
               <div class="col-6 col-md-8">
               </div>
               <div class="md-form md-outline col-6 col-md-4 float-right">
-                {% bootstrap_field form.upper_code placeholder="S17" size="medium" %}
+                {% bootstrap_field form.upper_code placeholder="V998" size="medium" %}
               </div>
 
               <div class="col-6 col-md-8">
               </div>
               <div class="md-form md-outline col-6 col-md-4 float-right">
-                {% bootstrap_field form.lower_code placeholder="J44" size="medium" %}
+                {% bootstrap_field form.lower_code placeholder="I872" size="medium" %}
               </div>
             </div>
 
+                <button style="overflow: visible !important; height: 0 !important; width: 0 !important; margin: 0 !important; border: 0 !important; padding: 0 !important; display: block !important;" type="submit" href="{% url 'pole_numbers' %}" name="button_default" value="1" > </button>
+
             <div class="row float-right">
               <div class="col-6">
-                <button type="submit" class="form-button btn btn-success float-left" href="{% url 'pole_numbers' %}" name="button_gps" value="">GPS coordinates</button>
+                <button type="submit" class="form-button btn btn-success float-left" href="{% url 'pole_numbers' %}" name="button_gps" value="1">GPS coordinates</button>
               </div>
               <div class="col-6">
-                <button type="submit" class="form-button btn btn-success float-right" href="{% url 'pole_numbers' %}" name="button_show" value="">Google Maps</button>
+                <button type="submit" class="form-button btn btn-success float-right" href="{% url 'pole_numbers' %}" name="button_show" value="1">Google Maps</button>
               </div>
             </div>
 
@@ -70,7 +75,7 @@
 
 
 <div class="row justify-content-center align-items-center">
-  <div class="col-sm-12 col-md-12 col-lg-6">
+  <div class="col-sm-12 col-md-12 col-lg-5">
     <br/>
     <br/>
     <hr/>
@@ -81,12 +86,16 @@
 
 <div class="row justify-content-center align-items-center">
 
-  <div class="col-sm-12 col-md-12 col-lg-8">
+  <div class="col-sm-12 col-md-12 col-lg-7">
 
     <div class="row">
 
+      <div class="col-12 text-right">
+        <h4 class="font-weight-bold mb-3">Convert GPS to pole codes</h4>
+      </div>
+
       <div class="col-lg-6 col-sm-12">
-        <div class="image" align=center>
+        <div class="image" align=right>
           <img src="{% static 'images/googlemap_gps.png' %}" style="padding-right:15px; max-width:300px;">
         </div>
       </div>
@@ -98,28 +107,23 @@
 
             <div class="row">
               <div class="col-12">
-                <h4 class="font-weight-bold mb-3">Convert GPS to pole codes</h4>
                 <p class="mdb-color-text" align="justify">Enter GPS coordinates to calculate corresponding pole codes at exact location in Anguilla.</p>
               </div>
 
-              <div class="col-lg-6 col-md-8 col-sm-12">
+              <div class="col-lg-4 col-md-8 col-sm-12">
               </div>
-              <div class="md-form md-outline col-sm-12 col-lg-6 col-md-4 float-right">
-                {% bootstrap_field form.gps_dms_input placeholder="18&deg;15&apos;10.2&quot;N 63&deg;01&apos;26.4&quot;W" size="medium" %}
+              <div class="md-form md-outline col-sm-12 col-lg-8 col-md-4 float-right">
+                {% bootstrap_field form.gps_dms_input placeholder="18&deg;12&apos;59.9&quot;N 63&deg;02&apos;52.3&quot;W" size="medium" %}
               </div>
 
-              <div class="col-lg-6 col-md-8 col-sm-12">
+              <div class="col-lg-4 col-md-8 col-sm-12">
               </div>
-              <div class="md-form md-outline col-sm-12 col-lg-6 col-md-4 float-right">
-                {% bootstrap_field form.gps_dd_input placeholder="18.252833, -63.024000" size="medium" %}
+              <div class="md-form md-outline col-sm-12 col-lg-8 col-md-4 float-right">
+                {% bootstrap_field form.gps_dd_input placeholder="18.216633, -63.047867" size="medium" %}
               </div>
             </div>
 
             <div class="space">
-              <div class="form-check form-check-inline">
-                <input id="checkbox1" type="checkbox" name="high_precision">
-                <label for="checkbox1">high precision, longer pole codes</label>
-              </div>
               <div class="float-right">
                 <button type="submit" class="form-button btn btn-success" href="{% url 'pole_numbers' %}" name="button_calculate" value="">calculate pole codes</button>
               </div>
@@ -138,7 +142,7 @@
 
 
 <div class="row justify-content-center align-items-center">
-  <div class="col-sm-12 col-md-12 col-lg-6">
+  <div class="col-sm-12 col-md-12 col-lg-5">
     <br/>
     <br/>
     <hr/>
@@ -149,18 +153,21 @@
 
 <div class="row justify-content-center align-items-center">
 
-  <div class="col-sm-12 col-md-12 col-lg-8">
+  <div class="col-sm-12 col-md-12 col-lg-7">
 
     <div class="row">
 
+      <div class="col-12 text-right">
+        <h4 class="font-weight-bold mb-3">Goole Maps link</h4>
+      </div>
+
       <div class="col-lg-6 col-sm-12">
-        <div class="image" align=center>
+        <div class="image" align=right>
           <img src="{% static 'images/googlemap_share_link.png' %}" style="padding-bottom:10px; max-width:300px;">
         </div>
       </div>
 
       <div class="col-lg-6 col-sm-12">
-        <h4 class="font-weight-bold mb-3">Goole Maps link</h4>
         <p class="mdb-color-text" align="justify">
           Enter Google Maps URL to calculate corresponding pole codes at exact location in Anguilla.
         </p>
@@ -185,15 +192,7 @@
               <div class="col-lg-6 col-md-4 col-sm-12">
               </div>
               <div class="md-form md-outline col-sm-12 col-lg-6 col-md-8 float-right">
-                {% bootstrap_field form.google_url placeholder="https://goo.gl/maps/axGS1ENr7SvACS5D8" size="medium" %}
-              </div>
-              <div class="col-lg-7 col-md-7 col-sm-12">
-              </div>
-              <div class="md-form md-outline col-sm-12 col-lg-5 col-md-5 float-right">
-                <div class="form-check form-check-inline float-right">
-                  <input id="checkbox2" type="checkbox" name="high_precision">
-                  <label for="checkbox2">high precision, longer pole codes</label>
-                </div>
+                {% bootstrap_field form.google_url placeholder="https://goo.gl/maps/78AKwsrW5BJnGYCh7" size="medium" %}
               </div>
             </div>
 

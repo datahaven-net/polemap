@@ -34,13 +34,6 @@ class PoleNumbersForm(forms.Form):
         required=False,
     )
 
-#     high_precision = fields.BooleanField(
-#         label='high precision, longer pole codes',
-#         help_text='',
-#         required=False,
-#         initial=False,
-#     )
-
     def clean(self):
         cleaned_data = super(PoleNumbersForm, self).clean()
         upper_code = cleaned_data.get('upper_code', '').strip()
