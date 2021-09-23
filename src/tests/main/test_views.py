@@ -67,7 +67,7 @@ class TestPoleNumbersView(TestCase):
             button_calculate='',
         ))
         assert response.status_code == 302
-        assert response.url == '/s17j44/info'
+        assert response.url == '/18.252833,63.024/result'
 
     def test_button_calculate_dms(self):
         response = self.client.post('/', data=dict(
@@ -75,7 +75,7 @@ class TestPoleNumbersView(TestCase):
             button_calculate='',
         ))
         assert response.status_code == 302
-        assert response.url == '/s17j44/info'
+        assert response.url == '/18.252833,-63.024/result'
 
 
     def test_button_calculate_high_precision(self):
@@ -85,7 +85,7 @@ class TestPoleNumbersView(TestCase):
             high_precision='',
         ))
         assert response.status_code == 302
-        assert response.url == '/s1701j4401/info'
+        assert response.url == '/18.252835,63.024001/result'
 
     @mock.patch('requests.request')
     def test_button_read(self, request_mock):
@@ -97,7 +97,7 @@ class TestPoleNumbersView(TestCase):
             button_read='',
         ))
         assert response.status_code == 302
-        assert response.url == '/s17j44/info'
+        assert response.url == '/18.252833,-63.024/result'
 
     @mock.patch('requests.request')
     def test_button_read_high_precision(self, request_mock):
@@ -110,7 +110,7 @@ class TestPoleNumbersView(TestCase):
             high_precision='',
         ))
         assert response.status_code == 302
-        assert response.url == '/s1702j4406/info'
+        assert response.url == '/18.252836,-63.02401/result'
 
     def test_invalid_input(self):
         response = self.client.post('/', data=dict(lat='wrong', lon='input'), follow=True)

@@ -1,0 +1,71 @@
+{% extends 'base/container_fluid.html' %}
+{% load static %}
+
+{% block main_content %}
+
+<script>
+  function copy_clipboard(element_id) {
+    var copyText = document.getElementById(element_id)
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    console.log('Copied Text')
+  }
+</script>
+
+<div class="row justify-content-center align-items-center">
+
+  <div class="col-lg-4 col-md-6 col-sm-12 text-center">
+    <br/>
+    <br/>
+    <p class="mdb-color-text" align="center">
+      <b>pole codes</b> at the location:
+    </p>
+    <h1><code>{{ upper_code }}</code></h1>
+    <h1><code>{{ lower_code }}</code></h1>
+    <br/>
+    <br/>
+
+    <p class="mdb-color-text" align="center">
+      link to share:
+    </p>
+    <div class="input-group mx-auto">
+      <input id="share_link" class="form-control" type="text" value="{{ share_link }}" style="min-width: 240px; max-width: 320px;" />
+      <span class="input-group-btn">
+        <a class="btn btn-light" type="button" role="button" onclick="copy_clipboard('share_link')"><span class="fa fa-copy">&nbsp;</span></a>
+      </span>
+      &nbsp;
+      &nbsp;
+      &nbsp;
+      <a class="btn btn-success" href="{{ google_url }}" role="button" target="_blank">
+        <span class="fa fa-map-marker">&nbsp;</span>
+        <b>{{ upper_code }} {{ lower_code }}</b>
+      </a>
+    </div>
+
+    <br/>
+    <br/>
+    <br/>
+
+    <p class="mdb-color-text" align="center">
+      GPS coordinates of the location as <b>decimal degrees</b>:
+      <br/>
+      <br/>
+      <code>{{ lat_dd }}, {{ lon_dd }}</code>
+    </p>
+    <br/>
+    <br/>
+    <br/>
+
+    <p class="mdb-color-text" align="center">
+      GPS coordinates of the location in <b>degrees minutes seconds</b> format:
+      <br/>
+      <br/>
+      <code>{{ lat_dms }} {{ lon_dms }}</code>
+    </p>
+
+  </div>
+
+</div>
+
+{% endblock %}

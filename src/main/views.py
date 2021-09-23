@@ -2,7 +2,6 @@ import re
 import requests
 import logging
 
-from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.views.generic import FormView
@@ -147,8 +146,49 @@ class PoleCodeGoogleMapsView(RedirectView):
         return f'https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q={lat}%2C{lon}'
 
 
-class PoleCodeInfoView(TemplateView):
+class PoleCodeResultView(TemplateView):
     template_name = 'main/result_page.html'
+
+    def get(self, request, *args, **kwargs):
+        lat_lon = kwargs.get('lat_lon', '')
+        re_result = re.match('^([\.\-\+\d]+?)\,([\.\-\+\d]+?)$', lat_lon)
+        if not re_result:
+            return redirect('pole_numbers')
+        try:
+            lat_dd = float(re_result.group(1).lower())
+            lon_dd = float(re_result.group(2).lower())
+            lat_dms, lon_dms = dd_to_dms(lat_dd, lon_dd)
+        except:
+            return redirect('pole_numbers')
+        results = []
+        pole_codes = []
+        for precision in [1, 2, 3, 4]:
+            upper_code, lower_code = dd_to_pole_codes(lat_dd, lon_dd, precision=precision)
+            pole_code = f'{upper_code}{lower_code}'.lower()
+            if pole_code in pole_codes:
+                continue
+            r = {}
+            r['precision'] = precision
+            r['full_code'] = pole_code
+            r['upper_code'] = upper_code.upper() + (' ' * (precision - len(upper_code) + 1))
+            r['lower_code'] = lower_code.upper() + (' ' * (precision - len(lower_code) + 1))
+            r['share_link'] = f'https://polemap.ai/{pole_code}'
+            r['google_url'] = f'https://polemap.ai/{pole_code}'
+            print(r)
+            results.append(r)
+            pole_codes.append(pole_code)
+        ctx = self.get_context_data(**kwargs)
+        ctx['max_precision'] = len(pole_codes)
+        ctx['pole_codes'] = results
+        ctx['lat_dd'] = lat_dd
+        ctx['lon_dd'] = lon_dd
+        ctx['lat_dms'] = lat_dms
+        ctx['lon_dms'] = lon_dms
+        return self.render_to_response(ctx)
+
+
+class PoleCodeInfoView(TemplateView):
+    template_name = 'main/info_page.html'
 
     def get(self, request, *args, **kwargs):
         pole_code = kwargs.get('pole_code', '')
@@ -208,6 +248,7 @@ class PoleNumbersView(FormView):
         button_calculate = 'button_calculate' in form.data
         button_read = 'button_read' in form.data
         button_gps = 'button_gps' in form.data
+        button_default = 'button_default' in form.data
         high_precision = 'high_precision' in form.data
 
         if button_calculate:
@@ -247,7 +288,7 @@ class PoleNumbersView(FormView):
                 messages.error(self.request, 'GPS coordinates is pointing to a location outside of Anguilla')
                 return self.form_invalid(form)
 
-            return redirect(f'/{upper_code.lower()}{lower_code.lower()}/info')
+            return redirect(f'/{lat_dd},{lon_dd}/result')
 
         if button_read:
             if not google_url:
@@ -277,9 +318,9 @@ class PoleNumbersView(FormView):
                 messages.error(self.request, 'GPS coordinates is pointing to a location outside of Anguilla')
                 return self.form_invalid(form)
 
-            return redirect(f'/{upper_code.lower()}{lower_code.lower()}/info')
+            return redirect(f'/{lat_dd},{lon_dd}/result')
 
-        if button_show or button_gps:
+        if button_show or button_gps or button_default:
             if not upper_code or not lower_code:
                 messages.error(self.request, 'Please enter both upper and lower pole codes')
                 return self.form_invalid(form)
@@ -308,11 +349,12 @@ class PoleNumbersView(FormView):
                 head2, _, tail2 = val2.partition(':')
                 tail1 += '.' + digits1
                 tail2 += '.' + digits2
-                lat = round(float(head1) + float(tail1) / 60.0, 6)
-                lon = -1.0 * round((float(head2) + float(tail2) / 60.0), 6)
+                lat_dd = round(float(head1) + float(tail1) / 60.0, 6)
+                lon_dd = -1.0 * round((float(head2) + float(tail2) / 60.0), 6)
             except:
                 return self.form_invalid(form)
             if button_gps:
+                # return redirect(f'/{lat_dd},{lon_dd}/result')
                 return redirect(f'/{upper_code.lower()}{lower_code.lower()}/info')
             return redirect(f'/{upper_code.lower()}{lower_code.lower()}')
 

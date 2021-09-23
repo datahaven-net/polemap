@@ -19,45 +19,79 @@
     <br/>
     <br/>
     <p class="mdb-color-text" align="center">
-      <b>pole codes</b> at the location:
+      We have generated different pole codes to chose from:
+      <ul style="list-style: none;">
+        <li>
+          <i>#1</i> is the shortest but least accurate
+        </li>
+        <li>
+          <i>#{{ max_precision }}</i> is the longest but most accurate
+        </li>
+      </ul>
+      You can copy & paste those links bellow to share a location in Anguilla.
+      <br/>
+      To test the link and view the location on Google Maps use one of the green buttons.
+      <br/>
+      <br/>
     </p>
-    <h1><code>{{ upper_code }}</code></h1>
-    <h1><code>{{ lower_code }}</code></h1>
-    <br/>
-    <br/>
 
-    <p class="mdb-color-text" align="center">
-      link to share:
-    </p>
-    <div class="input-group mx-auto w-50">
-      <input id="share_link" class="form-control" type="text" value="{{ share_link }}" style="min-width: 240px; max-width: 320px;" />
-      <span class="input-group-btn">
-        <a class="btn btn-light" type="button" role="button" onclick="copy_clipboard('share_link')"><span class="fa fa-copy">&nbsp;</span></a>
-      </span>
+    {% for pole_code in pole_codes %}
+
+    <div class="row">
+
+      <div class="col-1">
+        <i>#{{ pole_code.precision }}</i>
+      </div>
+
+      <div class="col-2">
+        <code>{{ pole_code.upper_code }}</code>
+        <br/>
+        <code>{{ pole_code.lower_code }}</code></h1>
+      </div>
+
+      <div class="col-6">
+        <div class="input-group mx-auto">
+          <input id="share_link_{{ pole_code.full_code }}" class="form-control" type="text" value="{{ pole_code.share_link }}" style="min-width: 240px; max-width: 320px;" />
+          <span class="input-group-btn">
+            <a class="btn btn-light" type="button" role="button" onclick="copy_clipboard('share_link_{{ pole_code.full_code }}')"><span class="fa fa-copy">&nbsp;</span></a>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-3 text-left">
+        <a class="btn btn-success" href="{{ pole_code.google_url }}" role="button" target="_blank">
+          <span class="fa fa-map-marker">&nbsp;</span>
+          <b>{{ pole_code.upper_code }} {{ pole_code.lower_code }}</b>
+        </a>
+      </div>
+
+      <div class="col-12">
+      <hr/>
+      </div>
+
     </div>
+
+    {% endfor %}
+
     <br/>
     <br/>
 
     <p class="mdb-color-text" align="center">
       GPS coordinates of the location as <b>decimal degrees</b>:
       <br/>
+      <br/>
       <code>{{ lat_dd }}, {{ lon_dd }}</code>
     </p>
+    <br/>
     <br/>
     <br/>
 
     <p class="mdb-color-text" align="center">
       GPS coordinates of the location in <b>degrees minutes seconds</b> format:
       <br/>
+      <br/>
       <code>{{ lat_dms }} {{ lon_dms }}</code>
     </p>
-    <br/>
-    <br/>
-
-    <a class="btn btn-success" href="{{ google_url }}" role="button" target="_blank">
-      <span class="fa fa-map-marker">&nbsp;</span>
-      Google Maps at <b>{{ upper_code }} {{ lower_code }}</b>
-    </a>
 
   </div>
 
