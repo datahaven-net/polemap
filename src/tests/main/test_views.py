@@ -7,48 +7,42 @@ from main import views
 
 class TestCalculations(TestCase):
 
-    def test_1(self):
+    def test_pole_codes_to_dd(self):
         assert views.pole_codes_to_dd('V99', 'I91') == (18.2165, -63.0485, )
         assert views.pole_codes_to_dd('U00', 'I91') == (18.216667, -63.0485, )
         assert views.pole_codes_to_dd('V1', 'I9') == (18.201667, -63.048333, )
-
-    def test_2(self):
-        assert views.dd_to_pole_codes(18.2528361, 63.024001, 1) == ('S2', 'J4', )
-        assert views.dd_to_pole_codes(18.2528361, 63.024001, 2) == ('S17', 'J44', )
-        assert views.dd_to_pole_codes(18.2528362, 63.024002, 3) == ('S170', 'J440', )
-        assert views.dd_to_pole_codes(18.2528361, 63.024001, 4) == ('S1702', 'J4401', )
-
-    def test_3(self):
         assert views.pole_codes_to_dd('V9998', 'I9100') == (18.216663, -63.0485, )
         assert views.pole_codes_to_dd('V9999', 'I9100') == (18.216665, -63.0485, )
         assert views.pole_codes_to_dd('V1001', 'I9100') == (18.201668, -63.0485, )
         assert views.pole_codes_to_dd('V1000', 'I9100') == (18.201667, -63.0485, )
         assert views.pole_codes_to_dd('V0999', 'I9100') == (18.201665, -63.0485, )
         assert views.pole_codes_to_dd('V0099', 'I9100') == (18.200165, -63.0485, )
+        assert views.pole_codes_to_dd('S17', 'J44') == views.pole_codes_to_dd('J44', 'S17')
 
-    def test_4(self):
+    def test_dd_to_pole_codes(self):
+        assert views.dd_to_pole_codes(18.2528361, 63.024001, 1) == ('S2', 'J4', )
+        assert views.dd_to_pole_codes(18.2528361, 63.024001, 2) == ('S17', 'J44', )
+        assert views.dd_to_pole_codes(18.2528362, 63.024002, 3) == ('S170', 'J440', )
+        assert views.dd_to_pole_codes(18.2528361, 63.024001, 4) == ('S1702', 'J4401', )
         assert views.dd_to_pole_codes(18.216667, -63.0485, 1) == ('U0', 'I9', )
         assert views.dd_to_pole_codes(18.216667, -63.0485, 2) == ('U00', 'I91', )
         assert views.dd_to_pole_codes(18.216667, -63.0485, 3) == ('U000', 'I910', )
         assert views.dd_to_pole_codes(18.216667, -63.0485, 4) == ('U0000', 'I9100', )
-
-    def test_5(self):
         assert views.dd_to_pole_codes(18.216666, -63.0485, 1) == ('U0', 'I9', )
         assert views.dd_to_pole_codes(18.216666, -63.0485, 2) == ('U00', 'I91', )
         assert views.dd_to_pole_codes(18.216666, -63.0485, 3) == ('U000', 'I910', )
         assert views.dd_to_pole_codes(18.216666, -63.0485, 4) == ('U0000', 'I9100', )
-
-    def test_6(self):
         assert views.dd_to_pole_codes(18.216665, -63.0485, 1) == ('U0', 'I9', )
         assert views.dd_to_pole_codes(18.216665, -63.0485, 2) == ('U00', 'I91', )
         assert views.dd_to_pole_codes(18.216665, -63.0485, 3) == ('U000', 'I910', )
         assert views.dd_to_pole_codes(18.216665, -63.0485, 4) == ('V9999', 'I9100', )
-
-    def test_7(self):
         assert views.dd_to_pole_codes(18.201665, -63.0485, 1) == ('V1', 'I9', )
         assert views.dd_to_pole_codes(18.201665, -63.0485, 2) == ('V10', 'I91', )
         assert views.dd_to_pole_codes(18.201665, -63.0485, 3) == ('V100', 'I910', )
         assert views.dd_to_pole_codes(18.201665, -63.0485, 4) == ('V0999', 'I9100', )
+
+    def test_dd_to_dms(self):
+        assert views.dd_to_dms(18.2528361, 63.024001) == ('18°15\'10.2\"N', '63°01\'26.4\"W')
 
 
 class TestPoleCodeGoogleMapsView(TestCase):
