@@ -51,7 +51,7 @@
 
       <div class="col-6">
         <div class="input-group mx-auto">
-          <input id="share_link_{{ pole_code.full_code }}" class="form-control" type="text" value="{{ pole_code.share_link }}" style="min-width: 240px; max-width: 320px;" />
+          <input id="share_link_{{ pole_code.full_code }}" class="form-control" type="text" value="{{ pole_code.share_link }}" style="min-width: 240px; max-width: 320px;" readonly />
           <span class="input-group-btn">
             <a class="btn btn-light" type="button" role="button" onclick="copy_clipboard('share_link_{{ pole_code.full_code }}')"><span class="fa fa-copy">&nbsp;</span></a>
           </span>
@@ -66,7 +66,7 @@
       </div>
 
       <div class="col-12">
-      <hr/>
+        <hr/>
       </div>
 
     </div>

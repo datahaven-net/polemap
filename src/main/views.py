@@ -75,8 +75,19 @@ def dd_to_pole_codes(lat_dd, lon_dd, precision=3):
     lon_tail = ( lon_dd * 10000000.0 - lon_head * 10000000.0 ) / 10000000.0
     lat_min = int(lat_tail * 60.0)
     lon_min = int(lon_tail * 60.0)
-    lat_sec = str(int(round(( lat_tail * 60.0 - lat_min ) * mul, 0))).zfill(precision).rstrip('0')
-    lon_sec = str(int(round(( lon_tail * 60.0 - lon_min ) * mul, 0))).zfill(precision).rstrip('0')
+    lat_sec = int(round(( lat_tail * 60.0 - lat_min ) * mul, 0))
+    lon_sec = int(round(( lon_tail * 60.0 - lon_min ) * mul, 0))
+    overflow = int(str('1' + '0' * (precision)))
+    if lat_sec == overflow:
+        lat_min += 1
+        lat_sec = 0
+    if lon_sec == overflow:
+        lon_min += 1
+        lon_sec = 0
+    lat_sec = str(lat_sec).zfill(precision)
+    lon_sec = str(lon_sec).zfill(precision)
+    lat_sec += (precision - len(lat_sec)) * '0'
+    lon_sec += (precision - len(lon_sec)) * '0'
     lat_min = str(lat_min).zfill(2)
     lon_min = str(lon_min).zfill(2)
     lat_code = f'{lat_head}:{lat_min}'
@@ -106,42 +117,48 @@ def dd_to_dms(lat_dd, lon_dd):
     return lat_dms, lon_dms
 
 
+def pole_codes_to_dd(upper_code, lower_code):
+    try:
+        letter1 = upper_code[0].lower()
+        letter2 = lower_code[0].lower()
+        digits1 = upper_code[1:].strip()
+        digits2 = lower_code[1:].strip()
+    except:
+        return None, None
+    if letter2 in 'qrstuvwxyz':
+        return pole_codes_to_dd(lower_code, upper_code)
+    val1 = pole_letters.get(letter1)
+    val2 = pole_letters.get(letter2)
+    if not val1 or not val2:
+        return None, None
+    try:
+        head1, _, tail1 = val1.partition(':')
+        head2, _, tail2 = val2.partition(':')
+        tail1 += '.' + digits1
+        tail2 += '.' + digits2
+        lat = round(float(head1) + float(tail1) / 60.0, 6)
+        lon = -1.0 * round((float(head2) + float(tail2) / 60.0), 6)
+    except:
+        return None, None
+    return lat, lon
+
+
 class PoleCodeGoogleMapsView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         pole_code = kwargs.get('pole_code', '')
         re_result = re.match('^(\w\d+?)\s*?(\w\d+?)$', pole_code)
         if not re_result:
+            logging.error('invalid input received')
             return '/'
         upper_code = re_result.group(1).lower()
         lower_code = re_result.group(2).lower()
         if not upper_code or not lower_code:
+            logging.error('invalid input received')
             return '/'
-        try:
-            num1 = upper_code
-            num2 = lower_code
-            letter1 = num1[0]
-            letter2 = num2[0]
-            digits1 = num1[1:].strip()
-            digits2 = num2[1:].strip()
-        except:
-            logging.exception('invalid input received')
-            return '/'
-        if letter2 in 'qrstuvwxyz':
-            return f'/{lower_code.lower()}{upper_code.lower()}'
-        val1 = pole_letters.get(letter1)
-        val2 = pole_letters.get(letter2)
-        if not val1 or not val2:
-            return '/'
-        try:
-            head1, _, tail1 = val1.partition(':')
-            head2, _, tail2 = val2.partition(':')
-            tail1 += '.' + digits1
-            tail2 += '.' + digits2
-            lat = round(float(head1) + float(tail1) / 60.0, 6)
-            lon = -1.0 * round((float(head2) + float(tail2) / 60.0), 6)
-        except:
-            logging.exception('invalid input received')
+        lat, lon = pole_codes_to_dd(upper_code, lower_code)
+        if lat is None and lon is None:
+            logging.error('invalid input received')
             return '/'
         return f'https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q={lat}%2C{lon}'
 
@@ -162,7 +179,7 @@ class PoleCodeResultView(TemplateView):
             return redirect('pole_numbers')
         results = []
         pole_codes = []
-        for precision in [1, 2, 3, 4]:
+        for precision in [1, 2, 3, 4, ]:
             upper_code, lower_code = dd_to_pole_codes(lat_dd, lon_dd, precision=precision)
             pole_code = f'{upper_code}{lower_code}'.lower()
             if pole_code in pole_codes:
@@ -173,8 +190,7 @@ class PoleCodeResultView(TemplateView):
             r['upper_code'] = upper_code.upper() + (' ' * (precision - len(upper_code) + 1))
             r['lower_code'] = lower_code.upper() + (' ' * (precision - len(lower_code) + 1))
             r['share_link'] = f'https://polemap.ai/{pole_code}'
-            r['google_url'] = f'https://polemap.ai/{pole_code}'
-            print(r)
+            r['google_url'] = f'/{pole_code}'
             results.append(r)
             pole_codes.append(pole_code)
         ctx = self.get_context_data(**kwargs)
@@ -197,29 +213,14 @@ class PoleCodeInfoView(TemplateView):
             return redirect('pole_numbers')
         upper_code = re_result.group(1).lower()
         lower_code = re_result.group(2).lower()
-        try:
-            letter1 = upper_code[0]
-            letter2 = lower_code[0]
-            digits1 = upper_code[1:].strip()
-            digits2 = lower_code[1:].strip()
-        except:
+        if lower_code[0].lower() in 'qrstuvwxyz':
+            _u = upper_code
+            upper_code = lower_code
+            lower_code = _u
+        lat, lon = pole_codes_to_dd(upper_code, lower_code)
+        if lat is None and lon is None:
             return redirect('pole_numbers')
-        if letter2 in 'qrstuvwxyz':
-            return redirect(f'/{lower_code.lower()}{upper_code.lower()}/info')
-        val1 = pole_letters.get(letter1)
-        val2 = pole_letters.get(letter2)
-        if not val1 or not val2:
-            return redirect('pole_numbers')
-        try:
-            head1, _, tail1 = val1.partition(':')
-            head2, _, tail2 = val2.partition(':')
-            tail1 += '.' + digits1
-            tail2 += '.' + digits2
-            lat = round(float(head1) + float(tail1) / 60.0, 6)
-            lon = round(-1.0 * (float(head2) + float(tail2) / 60.0), 6)
-            lat_dms, lon_dms = dd_to_dms(lat, lon)
-        except:
-            return redirect('pole_numbers')
+        lat_dms, lon_dms = dd_to_dms(lat, lon)
         ctx = self.get_context_data(**kwargs)
         ctx['upper_code'] = upper_code.upper()
         ctx['lower_code'] = lower_code.upper()
@@ -324,37 +325,10 @@ class PoleNumbersView(FormView):
             if not upper_code or not lower_code:
                 messages.error(self.request, 'Please enter both upper and lower pole codes')
                 return self.form_invalid(form)
-            try:
-                num1 = upper_code
-                num2 = lower_code
-                letter1 = num1[0]
-                letter2 = num2[0]
-                digits1 = num1[1:].strip()
-                digits2 = num2[1:].strip()
-            except:
-                return self.form_invalid(form)
-            if letter2 in 'qrstuvwxyz':
-                l_temp = letter2
-                d_temp = digits2
-                letter2 = letter1
-                digits2 = digits1
-                letter1 = l_temp
-                digits1 = d_temp
-            val1 = pole_letters.get(letter1)
-            val2 = pole_letters.get(letter2)
-            if not val1 or not val2:
-                return self.form_invalid(form)
-            try:
-                head1, _, tail1 = val1.partition(':')
-                head2, _, tail2 = val2.partition(':')
-                tail1 += '.' + digits1
-                tail2 += '.' + digits2
-                lat_dd = round(float(head1) + float(tail1) / 60.0, 6)
-                lon_dd = -1.0 * round((float(head2) + float(tail2) / 60.0), 6)
-            except:
+            lat_dd, lon_dd = pole_codes_to_dd(upper_code, lower_code)
+            if lat_dd is None and lon_dd is None:
                 return self.form_invalid(form)
             if button_gps:
-                # return redirect(f'/{lat_dd},{lon_dd}/result')
                 return redirect(f'/{upper_code.lower()}{lower_code.lower()}/info')
             return redirect(f'/{upper_code.lower()}{lower_code.lower()}')
 

@@ -2,6 +2,54 @@
 import mock
 from django.test import TestCase
 
+from main import views
+
+
+class TestCalculations(TestCase):
+
+    def test_1(self):
+        assert views.pole_codes_to_dd('V99', 'I91') == (18.2165, -63.0485, )
+        assert views.pole_codes_to_dd('U00', 'I91') == (18.216667, -63.0485, )
+        assert views.pole_codes_to_dd('V1', 'I9') == (18.201667, -63.048333, )
+
+    def test_2(self):
+        assert views.dd_to_pole_codes(18.2528361, 63.024001, 1) == ('S2', 'J4', )
+        assert views.dd_to_pole_codes(18.2528361, 63.024001, 2) == ('S17', 'J44', )
+        assert views.dd_to_pole_codes(18.2528362, 63.024002, 3) == ('S170', 'J440', )
+        assert views.dd_to_pole_codes(18.2528361, 63.024001, 4) == ('S1702', 'J4401', )
+
+    def test_3(self):
+        assert views.pole_codes_to_dd('V9998', 'I9100') == (18.216663, -63.0485, )
+        assert views.pole_codes_to_dd('V9999', 'I9100') == (18.216665, -63.0485, )
+        assert views.pole_codes_to_dd('V1001', 'I9100') == (18.201668, -63.0485, )
+        assert views.pole_codes_to_dd('V1000', 'I9100') == (18.201667, -63.0485, )
+        assert views.pole_codes_to_dd('V0999', 'I9100') == (18.201665, -63.0485, )
+        assert views.pole_codes_to_dd('V0099', 'I9100') == (18.200165, -63.0485, )
+
+    def test_4(self):
+        assert views.dd_to_pole_codes(18.216667, -63.0485, 1) == ('U0', 'I9', )
+        assert views.dd_to_pole_codes(18.216667, -63.0485, 2) == ('U00', 'I91', )
+        assert views.dd_to_pole_codes(18.216667, -63.0485, 3) == ('U000', 'I910', )
+        assert views.dd_to_pole_codes(18.216667, -63.0485, 4) == ('U0000', 'I9100', )
+
+    def test_5(self):
+        assert views.dd_to_pole_codes(18.216666, -63.0485, 1) == ('U0', 'I9', )
+        assert views.dd_to_pole_codes(18.216666, -63.0485, 2) == ('U00', 'I91', )
+        assert views.dd_to_pole_codes(18.216666, -63.0485, 3) == ('U000', 'I910', )
+        assert views.dd_to_pole_codes(18.216666, -63.0485, 4) == ('U0000', 'I9100', )
+
+    def test_6(self):
+        assert views.dd_to_pole_codes(18.216665, -63.0485, 1) == ('U0', 'I9', )
+        assert views.dd_to_pole_codes(18.216665, -63.0485, 2) == ('U00', 'I91', )
+        assert views.dd_to_pole_codes(18.216665, -63.0485, 3) == ('U000', 'I910', )
+        assert views.dd_to_pole_codes(18.216665, -63.0485, 4) == ('V9999', 'I9100', )
+
+    def test_7(self):
+        assert views.dd_to_pole_codes(18.201665, -63.0485, 1) == ('V1', 'I9', )
+        assert views.dd_to_pole_codes(18.201665, -63.0485, 2) == ('V10', 'I91', )
+        assert views.dd_to_pole_codes(18.201665, -63.0485, 3) == ('V100', 'I910', )
+        assert views.dd_to_pole_codes(18.201665, -63.0485, 4) == ('V0999', 'I9100', )
+
 
 class TestPoleCodeGoogleMapsView(TestCase):
 
@@ -13,7 +61,7 @@ class TestPoleCodeGoogleMapsView(TestCase):
     def test_reversed_input_order(self):
         response = self.client.get('/j44s17')
         assert response.status_code == 302
-        assert response.url == '/s17j44'
+        assert response.url == 'https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q=18.252833%2C-63.024'
 
 
 class TestPoleCodeInfoView(TestCase):
@@ -32,8 +80,15 @@ class TestPoleCodeInfoView(TestCase):
 
     def test_reversed_input_order(self):
         response = self.client.get('/j44s17/info')
-        assert response.status_code == 302
-        assert response.url == '/s17j44/info'
+        assert response.status_code == 200
+        assert response.context['upper_code'] == 'S17'
+        assert response.context['lower_code'] == 'J44'
+        assert response.context['lat_dd'] == 18.252833
+        assert response.context['lon_dd'] == -63.024
+        assert response.context['lat_dms'] == '18°15\'10.2\"N'
+        assert response.context['lon_dms'] == '63°01\'26.4\"W'
+        assert response.context['share_link'] == 'https://polemap.ai/s17j44'
+        assert response.context['google_url'] == 'https://maps.google.com/maps?&z=23&f=l&mrt=all&t=k&q=18.252833%2C-63.024'
 
     def test_bad_input(self):
         response = self.client.get('/wronginput/info')
