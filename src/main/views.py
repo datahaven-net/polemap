@@ -147,6 +147,8 @@ class PoleCodeGoogleMapsView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         pole_code = kwargs.get('pole_code', '')
+        if pole_code.lower() == 'faq':
+            return '/faq/'
         re_result = re.match('^(\w\d+?)\s*?(\w\d+?)$', pole_code)
         if not re_result:
             logging.error('invalid input received')

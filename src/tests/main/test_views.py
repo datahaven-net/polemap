@@ -167,6 +167,19 @@ class TestPoleNumbersView(TestCase):
         assert response.content.count(b'Invalid input received')
 
 
+class TestFAQView(TestCase):
+
+    def test_success(self):
+        response = self.client.get('/faq/')
+        assert response.status_code == 200
+        assert response.content.count(b'<h2><b>F</b>requently <b>A</b>sked <b>Q</b>uestions</h2>') == 1
+
+    def test_redirected(self):
+        response = self.client.get('/faq')
+        assert response.status_code == 302
+        assert response.url == '/faq/'
+
+
 class TestErrorViews(TestCase):
 
     def test_404_handler(self):
