@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.urls import path
+from django.views.generic import TemplateView
 
 from main import views as main_views
 
@@ -12,5 +13,6 @@ urlpatterns = [
     path('<str:pole_code>', main_views.PoleCodeGoogleMapsView.as_view(), name='pole_code_google_maps'),
     path('<str:pole_code>/info', main_views.PoleCodeInfoView.as_view(), name='pole_code_info'),
     path('<str:lat_lon>/result', main_views.PoleCodeResultView.as_view(), name='pole_code_result'),
+    path('faq/', TemplateView.as_view(template_name='main/faq.html'), name='pole_code_faq'),
     path('', main_views.PoleNumbersView.as_view(), name='pole_numbers'),
 ]
